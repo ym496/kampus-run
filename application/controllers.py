@@ -49,3 +49,9 @@ def monitor():
     if session.get('role') == 'user' or session.get('role') == 'admin':
         return render_template('monitor.html')
     return redirect(url_for('index'))
+
+@app.route('/start')
+def start():
+    if session.get('role') == 'user' or session.get('role') == 'admin':
+        return render_template('start.html')
+    return redirect(url_for('index'))
