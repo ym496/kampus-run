@@ -1,16 +1,40 @@
 function showRaceTimer() {
     var raceType = document.getElementById('raceType').value;
+    var raceArg = raceType.replace(/\D/g, ''); 
     var clockContainer = document.getElementById('clockContainer');
     var raceTitle = document.getElementById('raceTitle');
-    if (raceType === '5km' || raceType === '3km') {
-        clockContainer.style.display = 'block';
-        raceTitle.textContent = raceType + ' Race';
-        startTimer(); 
-        var startButton = document.getElementById('startButton');
-        startButton.setAttribute('onclick', 'startRace("' + raceType + '")');
-    } else {
-        clockContainer.style.display = 'none'; 
-    }
+
+    fetch('/has_started/' + raceArg, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.started) {
+            clockContainer.style.display = 'block';
+            raceTitle.textContent = raceType + ' Race';
+            startTimer();
+            var startButton = document.getElementById('startButton');
+            startButton.textContent = 'Started'; 
+            startButton.classList.remove('btn-primary'); 
+            startButton.classList.add('btn-secondary'); 
+            startButton.setAttribute('onclick', ''); 
+        } else {
+            clockContainer.style.display = 'block';
+            raceTitle.textContent = raceType + ' Race';
+            startTimer();
+            var startButton = document.getElementById('startButton');
+            startButton.textContent = 'Start'; 
+            startButton.classList.remove('btn-secondary'); 
+            startButton.classList.add('btn-primary'); 
+            startButton.setAttribute('onclick', 'startRace("' + raceArg + '")');
+        }
+    })
+    .catch(error => {
+        console.error('Error checking race status:', error);
+    });
 }
 
 function startTimer() {
@@ -27,5 +51,37 @@ function startTimer() {
 }
 
 function startRace(raceType) {
-    alert('Race started!'+ raceType);
+    var currentTime = new Date(); 
+    var hours = currentTime.getHours();
+    var minutes = currentTime.getMinutes();
+    var seconds = currentTime.getSeconds();
+
+    var requestData = {
+        raceType: raceType,
+        startTime: {
+            hours: hours,
+            minutes: minutes,
+            seconds: seconds
+        }
+    };
+
+    fetch('/start_race', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data)
+        var startButton = document.getElementById('startButton');
+        startButton.textContent = 'Started'; 
+        startButton.classList.remove('btn-primary'); 
+        startButton.classList.add('btn-secondary'); 
+        startButton.setAttribute('onclick', ''); 
+    })
+    .catch(error => {
+        console.error('Error starting race:', error);
+    });
 }
