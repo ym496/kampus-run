@@ -22,20 +22,19 @@ def load_user(user_id):
 @app.route('/')
 def index():
     if session.get('role') == 'user' or session.get('role') == 'admin':
-        return redirect(url_for('monitor'))
+        return redirect(url_for('start'))
 
     return render_template('index.html')
 
 @app.post('/login')
 def login():
     email = request.form.get('email')
-    print(email)
     password = request.form.get('password')
     user = User.query.filter_by(email=email).first()
     if user and user.password == password:
         login_user(user)
         session['role'] = "user"
-        return redirect(url_for('monitor'))
+        return redirect(url_for('start'))
 
 @app.route('/logout')
 def logout():

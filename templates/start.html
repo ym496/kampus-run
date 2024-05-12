@@ -28,14 +28,14 @@
             <div class="col-md-6 offset-md-3">
                 <div class="card">
                     <div class="card-header bg-primary text-white">
-                        Log
+                       Start Log
                     </div>
-                    <div class="card-body" id="chat-box" style="height: 300px; overflow-y: scroll;">
+                    <div class="card-body" id="chat-box" style="height: 400px; overflow-y: scroll;">
                         <!-- Chats here-->
                     </div>
                     <div class="card-footer">
                         <div class="input-group mb-3">
-                            <input type="text" class="form-control" placeholder="Type bib code">
+                            <input type="text" class="form-control" id="enter-bib" placeholder="Type bib code">
                             <button class="btn btn-primary" id="send-btn">Enter</button>
                         </div>
                     </div>
@@ -45,6 +45,8 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"></script>
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		<script src="{{ url_for('static', filename='start.js') }}"></script>
     <script>
         document.getElementById("send-btn").addEventListener("click", function() {
             var messageInput = document.querySelector("input[type='text']").value;
