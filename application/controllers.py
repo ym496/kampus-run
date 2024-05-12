@@ -68,10 +68,10 @@ def has_started(race_id):
 
 @app.post('/start_race')
 def start_race():
-    race_type = request.json.get('raceType')  
-    start_time = request.json.get('startTime')  
-    cat = db.session.query(RaceType).filter_by(category=race_type).first()
     if session.get('role') == 'user' or session.get('role') == 'admin':
+        race_type = request.json.get('raceType')  
+        start_time = request.json.get('startTime')  
+        cat = db.session.query(RaceType).filter_by(category=race_type).first()
         if start_time:
             hours = start_time.get('hours')
             minutes = start_time.get('minutes')
