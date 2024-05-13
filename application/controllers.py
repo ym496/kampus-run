@@ -89,7 +89,7 @@ def start_race():
             db.session.commit()
             return jsonify({"result":"success"})
         else:
-            return jsonify({"eror":"Where the time, son?"})
+            return jsonify({"eror":"Where the time, son?"}), 400
 
 @app.post('/start_log')
 def start_log():
