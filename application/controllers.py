@@ -3,6 +3,7 @@ from flask import current_app as app
 from flask_login import LoginManager, login_user, logout_user, current_user
 from application.models import User, Admin, Runner, RaceType, db
 from datetime import datetime, timedelta
+import re
 
 app.secret_key = '1234'
 login_manager = LoginManager(app)
@@ -89,3 +90,27 @@ def start_race():
             return jsonify({"result":"success"})
         else:
             return jsonify({"eror":"Where the time, son?"})
+
+@app.post('/start_log')
+def start_log():
+    if session.get('role') == 'user' or session.get('role') == 'admin':
+        bib_code = request.json.get('bib_code')
+        pattern = r'^\d{1,3}$'
+        if re.match(pattern, bib_code):
+            pass
+        else:
+            return jsonify({'status': 'error', 'message': 'Invalid bib_code'}), 400
+        # check validity of bib_code once again when the format is decided
+        start_time = request.json.get('startTime')
+        player = db.session.query(Runner).filter_by(bib_code=bib_code).first()
+        if player is None: 
+            hours = start_time.get('hours')
+            minutes = start_time.get('minutes')
+            seconds = start_time.get('seconds')
+            start_time_object = datetime.now().replace(hour=hours, minute=minutes, second=seconds)
+            runner = Runner(bib_code=bib_code,start_time=start_time_object)
+            db.session.add(runner)
+            db.session.commit()
+            return jsonify({"result":"success"})
+        else:
+            return jsonify({"result":"Player start time has already been noted."}), 400
