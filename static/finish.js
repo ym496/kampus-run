@@ -17,14 +17,14 @@ function sendMessage() {
 
         var requestData = {
             bib_code: messageInput,
-            startTime: {
+            finishTime: {
                 hours: hours,
                 minutes: minutes,
                 seconds: seconds
             }
         };
 
-        fetch('/start_log', {
+        fetch('/finish_log', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
