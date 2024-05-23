@@ -38,6 +38,18 @@ def login():
         session['role'] = "user"
         return redirect(url_for('start'))
 
+@app.route('/admin_login',methods=['GET','POST'])
+def admin_login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        admin = Admin.query.filter_by(username=username).first()
+        if admin and admin.password == password:
+            login_user(admin)
+            session['role'] = "admin"
+            return redirect(url_for('monitor'))
+    return render_template("admin_login.html")
+
 @app.route('/logout')
 def logout():
     logout_user()
@@ -47,7 +59,7 @@ def logout():
 
 @app.route('/monitor')
 def monitor():
-    if session.get('role') == 'user' or session.get('role') == 'admin':
+    if session.get('role') == 'admin':
         return render_template('monitor.html')
     return redirect(url_for('index'))
 
