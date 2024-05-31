@@ -163,3 +163,6 @@ def finish_log():
             return jsonify({"result":"success"})
         else:
             return jsonify({"result":"This runner has already been logged."}), 400
+
+
+@app.post('/append_logs')

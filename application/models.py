@@ -29,3 +29,11 @@ class RaceType(db.Model):
     has_started = db.Column(db.Integer, default=0, nullable=False)
     has_finished = db.Column(db.Integer, default=0, nullable=False)
     runners = db.relationship('Runner', backref='race_type', lazy=True)
+    groups = db.relationship('RaceGroup', backref='race_type', lazy=True)
+
+class RaceGroup(db.Model):
+    id = db.Column(db.Integer, primary_key=True,autoincrement=True)
+    group_number = db.Column(db.Integer, nullable=False)
+    start_time = db.Column(db.DateTime)
+    finish_time = db.Column(db.DateTime)
+    race_type_id = db.Column(db.Integer, db.ForeignKey('race_type.id'), nullable=False)
