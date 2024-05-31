@@ -4,9 +4,11 @@ from flask_login import LoginManager, login_user, logout_user, current_user
 from application.models import User, Admin, Runner, RaceType, db
 from datetime import datetime, timedelta
 import re
+import json
 
 app.secret_key = '1234'
 login_manager = LoginManager(app)
+LOG_FILE = 'logfile.txt'
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -116,18 +118,24 @@ def start_race():
 def start_log():
     if session.get('role') == 'user' or session.get('role') == 'admin':
         bib_code = request.json.get('bib_code')
-        pattern = r'^\d{1,3}$'
-        if re.match(pattern, bib_code):
-            pass
-        else:
-            return jsonify({'status': 'error', 'message': 'Invalid bib_code'}), 400
-        # check validity of bib_code once again when the format is decided
+        start_time = request.json.get('startTime')
+        hours = start_time.get('hours')
+        minutes = start_time.get('minutes')
+        seconds = start_time.get('seconds')
+        date = start_time.get('date')
+
+        log_entry = f'{start_time["date"]}, {start_time["hours"]:02}:{start_time["minutes"]:02}:{start_time["seconds"]:02}, start_log: {bib_code}\n'
+
+        with open(LOG_FILE, 'a') as log_file:
+            log_file.write(log_entry)
+
         """
         Create a function to read excel file and return data based on bib_code.
         """
         runner = db.session.query(Runner).filter_by(bib_code=bib_code).first()
+        log_time = datetime.now().replace(hour=hours, minute=minutes, second=seconds)
         if runner is None: 
-            runner = Runner(bib_code=bib_code,race_type_id=5) #change the race_type_id
+            runner = Runner(bib_code=bib_code,race_type_id=5,start_time=log_time) 
             db.session.add(runner)
             db.session.commit()
             return jsonify({"result":"success"})
@@ -138,6 +146,17 @@ def start_log():
 def finish_log():
     if session.get('role') == 'user' or session.get('role') == 'admin':
         bib_code = request.json.get('bib_code')
+        finish_time = request.json.get('finishTime')
+        hours = finish_time.get('hours')
+        minutes = finish_time.get('minutes')
+        seconds = finish_time.get('seconds')
+        date = finish_time.get('date')
+
+        log_entry = f'{finish_time["date"]}, {finish_time["hours"]:02}:{finish_time["minutes"]:02}:{finish_time["seconds"]:02}, finish_log: {bib_code}\n'
+
+        with open(LOG_FILE, 'a') as log_file:
+            log_file.write(log_entry)
+
         pattern = r'^\d{1,3}$'
         if re.match(pattern, bib_code):
             pass
@@ -148,14 +167,10 @@ def finish_log():
         do something here to get the 
         """
         runner = db.session.query(Runner).filter_by(bib_code=bib_code).first()
-        finish_time = request.json.get('finishTime')
-        if runner is None: 
-            return jsonify({'status': 'error', 'message': ' No runner for this bib_code'}), 400
-        hours = finish_time.get('hours')
-        minutes = finish_time.get('minutes')
-        seconds = finish_time.get('seconds')
         race_type = db.session.query(RaceType).filter_by(category=runner.race_type_id).first()
         finish_time_object = datetime.now().replace(hour=hours, minute=minutes, second=seconds)
+        if runner is None: 
+            return jsonify({'status': 'error', 'message': ' No runner for this bib_code'}), 400
         if runner.finish_time is None and race_type.has_finished == 0:
             runner.finish_time = finish_time_object
             db.session.add(runner)
@@ -163,6 +178,3 @@ def finish_log():
             return jsonify({"result":"success"})
         else:
             return jsonify({"result":"This runner has already been logged."}), 400
-
-
-@app.post('/append_logs')
